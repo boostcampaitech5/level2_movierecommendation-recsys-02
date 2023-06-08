@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+*__pycache__/
 *.py[cod]
 *$py.class
 
@@ -176,6 +176,12 @@ data/train/*.csv
 data/train/*.json
 data/train/*.tsv
 data/eval/*.csv
+Recbole/general/dataset/*
 
 # output
 code/output/*
+Recbole/general/output/*
+
+# model
+Recbole/general/log_tensorboard/*
+Recbole/general/saved/*
