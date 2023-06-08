@@ -87,3 +87,14 @@ def make_config(args, config_name : str) -> None:
         parameter_dict['eval_args']['split'] = {'RS' : [1,0,0]}
     
     return parameter_dict
+
+
+def load_yaml(args):
+
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+    yaml_path = os.path.join(curr_dir, 'yaml_dir', args.model_name)
+    if not os.path.isfile(yaml_path):
+        print("Make config...")
+        make_config(args.model_name)
+

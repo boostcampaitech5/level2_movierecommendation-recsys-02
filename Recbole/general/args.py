@@ -23,6 +23,14 @@ def parse_args():
 
     parser.add_argument("--top_k",default = 10,type=int)
     
+    parser.add_argument("--max_len",default = 50,type=int)
+
+    parser.add_argument("--user_lower_bound",default = 0,type=int)
+    parser.add_argument("--user_upper_bound",default = 'inf',type=str)
+    parser.add_argument("--item_lower_bound",default = 0,type=int)
+    parser.add_argument("--item_upper_bound",default = 'inf',type=str)
+
+    parser.add_argument("--filter_inter",default = False,type=False)
     
     #inference
     parser.add_argument("--inference_model" , default = "MultiVAE-Jun-06-2023_05-28-43.pth", type=str,help ="use model")
