@@ -14,14 +14,14 @@ def feature_engineering(
     director_data
 ):
     
-    train_data = remove_same_title(train_data)
-    year_data = year_preprocessing(title_data, year_data)
-    title_data = remove_year_for_title(title_data)
+    remove_same_title(train_data)
+    year_preprocessing(title_data, year_data)
+    remove_year_for_title(title_data)
     train_data = timestamp_feature(train_data)
     writer_preprocessing(writer_data)
     director_preprocessing(director_data)
-    writer_data,director_data,genre_data = merge_list(writer_data,director_data,genre_data)
-    year_data = rename_year(year_data)
+    writer_data, director_data, genre_data = merge_list(writer_data,director_data,genre_data)
+    rename_year(year_data)
     # year_data['pub_year_cat'],year_data['pub_year_nor'] = year_data['pub_year'].copy(),year_data['pub_year'].copy()
     # genre_data = apply_pca_to_genre(genre_data, 2)
 
@@ -40,8 +40,6 @@ def year_preprocessing(title_data, year_data):
     
     for target in target_item:
         year_data[year_data['item'] == target]['year'] = title_data[title_data['item'] == target]['title_year']
-    
-    return year_data
 
 def timestamp_feature(train_data:pd.DataFrame)->pd.DataFrame:
     '''
@@ -59,7 +57,6 @@ def remove_year_for_title(title_data:pd.DataFrame)->pd.DataFrame:
     title_data['title'] = title_data['title'].str.replace(pat = r'\(.*\)|\s-\s.*', repl=r'', regex=True)
     title_data['title'] = title_data['title'].str.replace(pat = r'\, The|\s-\s.*', repl=r'', regex=True)
     title_data['title'] = title_data['title'].str.strip()
-    return title_data
 
 def merge_list(writer_data,director_data,genre_data):
     writer_data = writer_data.groupby(by = ['item'])['writer'].apply(list).reset_index(name = 'writer')
@@ -69,7 +66,6 @@ def merge_list(writer_data,director_data,genre_data):
 
 def rename_year(year_data:pd.DataFrame)->pd.DataFrame:
     year_data.columns=['item','pub_year']
-    return year_data
 
 def apply_pca_to_genre(genre_data, n):
     
@@ -99,8 +95,6 @@ def remove_same_title(train_data):
         (64997 -> 34048)
     '''
     train_data.loc[train_data[train_data['item'] == 64997].index, 'item'] = 34048
-    
-    return train_data
 
 def pub_year_to_normalize(pub_year:int,mean:int=1992.174732,std:int=19.052568):
     pub_year = (pub_year - mean)/std
