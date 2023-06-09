@@ -16,6 +16,7 @@ def feature_engineering(
     title_data = remove_year_for_title(title_data)
     train_data = timestamp_feature(train_data)
     writer_data,director_data,genre_data = merge_list(writer_data,director_data,genre_data)
+    year_data = rename_year(year_data)
     
     return train_data, year_data, writer_data, title_data, genre_data, director_data
 
@@ -59,4 +60,6 @@ def merge_list(writer_data,director_data,genre_data):
     genre_data = genre_data.groupby(by = ['item'])['genre'].apply(list).reset_index(name = 'genre')
     return writer_data, director_data, genre_data
 
-def rename_year()
+def rename_year(year_data:pd.DataFrame)->pd.DataFrame:
+    year_data.columns=['item','pub_year']
+    return year_data
