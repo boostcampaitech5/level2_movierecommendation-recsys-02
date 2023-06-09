@@ -14,6 +14,7 @@ def feature_engineering(
     director_data
 ):
     
+    train_data = remove_same_title(train_data)
     year_data = year_preprocessing(title_data, year_data)
     title_data = remove_year_for_title(title_data)
     train_data = timestamp_feature(train_data)
@@ -88,3 +89,12 @@ def apply_pca_to_genre(genre_data, n):
     final_df = pd.concat([item, principal_df], axis = 1)
     
     return final_df
+
+def remove_same_title(train_data):
+    '''
+        itemID가 다른데 title이 동일한 item을 더 정보가 많은 ID로 통일
+        (64997 -> 34048)
+    '''
+    train_data.loc[train_data[train_data['item'] == 64997].index, 'item'] = 34048
+    
+    return train_data
