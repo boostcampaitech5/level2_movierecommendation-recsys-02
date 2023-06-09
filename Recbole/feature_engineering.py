@@ -22,7 +22,6 @@ def feature_engineering(
     director_preprocessing(director_data)
     writer_data,director_data,genre_data = merge_list(writer_data,director_data,genre_data)
     year_data = rename_year(year_data)
-    # year_data = rename_year(year_data)
     # year_data['pub_year_cat'],year_data['pub_year_nor'] = year_data['pub_year'].copy(),year_data['pub_year'].copy()
     # genre_data = apply_pca_to_genre(genre_data, 2)
 
