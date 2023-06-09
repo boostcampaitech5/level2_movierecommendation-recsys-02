@@ -101,7 +101,7 @@ def remove_same_title(train_data):
     
     return train_data
 
-    def pub_year_to_normalize(pub_year:int,mean:int=1992.174732,std:int=19.052568):
+def pub_year_to_normalize(pub_year:int,mean:int=1992.174732,std:int=19.052568):
     pub_year = (pub_year - mean)/std
     return pub_year
 
