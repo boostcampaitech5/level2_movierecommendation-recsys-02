@@ -20,7 +20,9 @@ def feature_engineering(
     train_data = timestamp_feature(train_data)
     writer_data,director_data,genre_data = merge_list(writer_data,director_data,genre_data)
     year_data = rename_year(year_data)
-    genre_data = apply_pca_to_genre(genre_data, 2)
+    # year_data = rename_year(year_data)
+    # year_data['pub_year_cat'],year_data['pub_year_nor'] = year_data['pub_year'].copy(),year_data['pub_year'].copy()
+    # genre_data = apply_pca_to_genre(genre_data, 2)
 
     return train_data, year_data, writer_data, title_data, genre_data, director_data
 
@@ -98,3 +100,28 @@ def remove_same_title(train_data):
     train_data.loc[train_data[train_data['item'] == 64997].index, 'item'] = 34048
     
     return train_data
+
+    def pub_year_to_normalize(pub_year:int,mean:int=1992.174732,std:int=19.052568):
+    pub_year = (pub_year - mean)/std
+    return pub_year
+
+def pub_year_to_category(pub_year:int):
+
+    if pub_year <= 1950:
+        return 1950
+    elif pub_year <= 1960:
+        return 1960
+    elif pub_year <= 1970:
+        return 1970
+    elif pub_year <= 1980:
+        return 1980
+    elif pub_year <= 1990:
+        return 1990
+    elif pub_year <= 2000:
+        return 2000
+    elif pub_year <= 2005:
+        return 2005
+    elif pub_year <= 2010:
+        return 2010
+    else:
+        return 2015
