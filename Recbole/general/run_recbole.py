@@ -8,6 +8,8 @@ from tqdm import tqdm
 from args import parse_args
 from logging import getLogger
 import torch
+import pdb
+from util import load_data_file, save_atomic_file
 
 from recbole.model.general_recommender.multivae import MultiVAE
 from recbole.quick_start import run_recbole
@@ -44,35 +46,18 @@ def run(args,model_name):
             dataset='train_data',
             config_file_list=['general.yaml'],
         )
-    
+
+
 def main(args):
     """모델 train 파일
     args:
         model_name(default - "MultiVAE") : 모델의 이름을 입력받습니다.
         나머지는 hyper parameter 입니다. 
     """
-    # train load
-    train = pd.read_csv("/opt/ml/input/data/train/train_ratings.csv")
-    
-    # indexing save
-    user2idx = {v:k for k,v in enumerate(sorted(set(train.user)))}
-    item2idx = {v:k for k,v in enumerate(sorted(set(train.item)))}
-    uidx2user = {k:v for k,v in enumerate(sorted(set(train.user)))}
-    iidx2item = {k:v for k,v in enumerate(sorted(set(train.item)))}
-    
-    # indexing
-    train.user = train.user.map(user2idx)
-    train.item = train.item.map(item2idx)
-    
-    # train 컬럼명 변경
-    train.columns=['user_id:token','item_id:token','timestamp:float']
-    
-    # to_csv
-    outpath = f"dataset/train_data"
-    os.makedirs(outpath, exist_ok=True)
-    train.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False)
-    
-    
+    train_data, user_data, item_data = load_data_file()
+
+    save_atomic_file(train_data, user_data, item_data)
+
     yamldata=f"""
     USER_ID_FIELD: user_id
     ITEM_ID_FIELD: item_id
@@ -80,6 +65,8 @@ def main(args):
 
     load_col:
         inter: [user_id, item_id, timestamp]
+        user: [user_id]
+        item: [item_id, title, year, writer, genre, director]
 
     show_progress : False
     epochs : {args.epochs}
