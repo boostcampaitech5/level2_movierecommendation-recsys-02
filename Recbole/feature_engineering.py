@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import os
 import time
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import MultiLabelBinarizer
 
 def feature_engineering(
     train_data,
@@ -63,3 +65,24 @@ def merge_list(writer_data,director_data,genre_data):
 def rename_year(year_data:pd.DataFrame)->pd.DataFrame:
     year_data.columns=['item','pub_year']
     return year_data
+
+def apply_pca_to_genre(genre_data, n):
+    '''
+        data: 
+            pca 적용할 컬럼이 list 형태로 되어있어야 함
+            결측치가 없어야 함
+    '''
+    
+    item = genre_data['item']
+    genre = genre_data['genre']
+    
+    mlb = MultiLabelBinarizer()
+    x = pd.DataFrame(mlb.fit_transform(genre), columns=mlb.classes_, index=genre_data.index)
+    
+    pca = PCA(n_components=n)
+    principal_components = pca.fit_transform(x)
+    principal_df = pd.DataFrame(data=principal_components).add_prefix('pca_')
+    
+    final_df = pd.concat([item, principal_df], axis = 1)
+    
+    return final_df
