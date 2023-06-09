@@ -19,7 +19,8 @@ def feature_engineering(
     train_data = timestamp_feature(train_data)
     writer_data,director_data,genre_data = merge_list(writer_data,director_data,genre_data)
     year_data = rename_year(year_data)
-    
+    genre_data = apply_pca_to_genre(genre_data, 2)
+
     return train_data, year_data, writer_data, title_data, genre_data, director_data
 
 def year_preprocessing(title_data, year_data):
@@ -67,6 +68,7 @@ def rename_year(year_data:pd.DataFrame)->pd.DataFrame:
     return year_data
 
 def apply_pca_to_genre(genre_data, n):
+    
     '''
         data: 
             pca 적용할 컬럼이 list 형태로 되어있어야 함
