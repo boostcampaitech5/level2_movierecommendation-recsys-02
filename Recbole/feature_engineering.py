@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import time
 
 def feature_engineering(
     train_data,
@@ -53,7 +54,9 @@ def remove_year_for_title(title_data:pd.DataFrame)->pd.DataFrame:
     return title_data
 
 def merge_list(writer_data,director_data,genre_data):
-    writer_data = writer_data.groupby(by = ['item'])['writer'].apply(list).reset_index(name = 'genre')
-    director_data = director_data.groupby(by = ['item'])['director'].apply(list).reset_index(name = 'genre')
+    writer_data = writer_data.groupby(by = ['item'])['writer'].apply(list).reset_index(name = 'writer')
+    director_data = director_data.groupby(by = ['item'])['director'].apply(list).reset_index(name = 'director')
     genre_data = genre_data.groupby(by = ['item'])['genre'].apply(list).reset_index(name = 'genre')
-    return writer_data,director_data,genre_data
+    return writer_data, director_data, genre_data
+
+def rename_year()
