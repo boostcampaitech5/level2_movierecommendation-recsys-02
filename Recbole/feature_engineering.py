@@ -18,6 +18,8 @@ def feature_engineering(
     year_data = year_preprocessing(title_data, year_data)
     title_data = remove_year_for_title(title_data)
     train_data = timestamp_feature(train_data)
+    writer_preprocessing(writer_data)
+    director_preprocessing(director_data)
     writer_data,director_data,genre_data = merge_list(writer_data,director_data,genre_data)
     year_data = rename_year(year_data)
     # year_data = rename_year(year_data)
@@ -125,3 +127,9 @@ def pub_year_to_category(pub_year:int):
         return 2010
     else:
         return 2015
+
+def writer_preprocessing(writer_data):
+    writer_data.loc[writer_data[writer_data.isna()].index, 'writer'] == 'nm0000000'
+    
+def director_preprocessing(director_data):
+    director_data.loc[director_data[director_data.isna()].index, 'director'] == 'nm0000000'
