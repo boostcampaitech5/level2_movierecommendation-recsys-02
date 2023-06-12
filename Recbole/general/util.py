@@ -1,5 +1,6 @@
 import os, pdb, pickle
 import pandas as pd
+from datetime import datetime
 
 def load_index_file():
     curr_path = os.path.dirname(os.path.realpath(__file__))
@@ -101,3 +102,24 @@ def save_atomic_file(train_data, user_data, item_data):
     os.makedirs(outpath, exist_ok=True)
     train_data.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False)
     train_data.to_csv(os.path.join(outpath,"train_data.item"),sep='\t',index=False)
+
+
+def afterprocessing(sub,train):
+    # 날짜를 datetime 형식으로 변환
+    new_train = train.copy()
+    new_train['time'] = new_train['time'].apply(lambda x: datetime.fromtimestamp(x))
+
+    # 유저별 영화시청 마지막년도 추출
+    user_mv_idx= new_train.groupby('user')['time'].max().reset_index()
+    user_mv_idx['lastyear'] = user_mv_idx['time'].apply(lambda x : x.year)
+    user_mv_idx.drop('time',inplace = True ,axis=1)
+
+    # 영화 개봉년도와 유저시청년도 합친 데이터프레임 구축
+    years = pd.read_csv("/opt/ml/input/data/train/years.tsv",sep = '\t')
+    sub = pd.merge(sub,years, on = ['item'] , how = 'left')
+    sub = pd.merge(sub,user_mv_idx,on =['user'],how ='left')
+
+    # 늦게 개봉한 영화 제외하고 상위 10개 추출
+    sub = sub[sub['lastyear'] >= sub['year']]
+    sub = sub.groupby('user').head(10)[['user','item']]
+    return sub

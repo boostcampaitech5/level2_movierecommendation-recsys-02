@@ -8,6 +8,7 @@ from tqdm import tqdm
 from args import parse_args
 from logging import getLogger
 import torch
+from util import afterprocessing
 
 from recbole.model.general_recommender.multivae import MultiVAE
 from recbole.quick_start import run_recbole
@@ -118,7 +119,8 @@ def main(args):
     
     sub.user = sub.user.map(uidx2user)
     sub.item = sub.item.map(iidx2item)
-                            
+    
+    sub = afterprocessing(sub,train)
     # SAVE OUTPUT
     output_dir = os.getcwd()+'/output/'
     write_path = os.path.join(output_dir, f"{args.model_name}.csv")
@@ -130,7 +132,7 @@ def main(args):
         for id, p in sub.values:
             w.write('{},{}\n'.format(id,p))
     print('inference done!')
-
+    
 
 
 
