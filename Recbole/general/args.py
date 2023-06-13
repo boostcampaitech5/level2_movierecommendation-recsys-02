@@ -26,7 +26,7 @@ def parse_args():
     
     #inference
     parser.add_argument("--inference_model" , default = "MultiVAE-Jun-06-2023_05-28-43.pth", type=str,help ="use model")
-    parser.add_argument("--rank_K", default = 10, type=int, help="# of predict number")
+    parser.add_argument("--rank_K", default = 30, type=int, help="# of predict number")
     
     args = parser.parse_args()
 

@@ -72,9 +72,6 @@ def load_data_file():
     genre_data = pd.read_csv(os.path.join(data_path, 'genres.tsv'), sep='\t')
     director_data = pd.read_csv(os.path.join(data_path, 'directors.tsv'), sep='\t')
 
-    writer_data_group = writer_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))
-    genre_data_group = genre_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))
-    director_data_group = director_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))
     # indexing save
     user2uidx, item2iidx, _, _ = load_index_file()
     
@@ -84,9 +81,9 @@ def load_data_file():
 
     df_merge = pd.merge(train_data, title_data, on='item', how='left')
     df_merge = pd.merge(df_merge, year_data, on='item', how='left')
-    df_merge = pd.merge(df_merge, writer_data_group, on='item', how='left')
-    df_merge = pd.merge(df_merge, genre_data_group, on='item', how='left')
-    df_merge = pd.merge(df_merge, director_data_group, on='item', how='left')
+    df_merge = pd.merge(df_merge, writer_data, on='item', how='left')
+    df_merge = pd.merge(df_merge, genre_data, on='item', how='left')
+    df_merge = pd.merge(df_merge, director_data, on='item', how='left')
 
     user_data = df_merge[['user']].drop_duplicates(subset=['user']).reset_index(drop=True)
     item_data = df_merge[['item', 'title', 'year', 'writer', 'genre', 'director']].drop_duplicates(subset=['item']).reset_index(drop=True)
@@ -98,7 +95,7 @@ def save_atomic_file(train_data, user_data, item_data):
     # train_data 컬럼명 변경
     train_data.columns = ['user_id:token','item_id:token','timestamp:float']
     user_data.columns = ['user_id:token']
-    item_data.columns = ['item_id:token', 'title:token_seq', 'year:token', 'writer:token_seq', 'genre:token_seq', 'director:token_seq']
+    item_data.columns = ['item_id:token', 'title:token_seq', 'year:token', 'writer:token', 'genre:token', 'director:token']
     
     # to_csv
     outpath = f"dataset/{dataset_name}"
@@ -111,7 +108,10 @@ def afterprocessing(sub,train):
     # 날짜를 datetime 형식으로 변환
     new_train = train.copy()
     new_train['time'] = new_train['time'].apply(lambda x: datetime.fromtimestamp(x))
-
+    
+    # 이전 시청 영화 제거
+    sub = pd.merge(sub,train,on =['user','item'],how='left')
+    sub = sub[sub['time'].isnull()][['user','item']]
     # 유저별 영화시청 마지막년도 추출
     user_mv_idx= new_train.groupby('user')['time'].max().reset_index()
     user_mv_idx['lastyear'] = user_mv_idx['time'].apply(lambda x : x.year)
