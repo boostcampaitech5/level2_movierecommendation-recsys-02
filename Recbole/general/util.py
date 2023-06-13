@@ -71,10 +71,10 @@ def load_data_file():
     writer_data = pd.read_csv(os.path.join(data_path, 'writers.tsv'), sep='\t')
     genre_data = pd.read_csv(os.path.join(data_path, 'genres.tsv'), sep='\t')
     director_data = pd.read_csv(os.path.join(data_path, 'directors.tsv'), sep='\t')
-    
-    writer_data_group = writer_data.groupby(writer_data.item).sum()
-    genre_data_group = genre_data.groupby(genre_data.item).sum()
-    director_data_group = director_data.groupby(director_data.item).sum()
+
+    writer_data_group = writer_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))
+    genre_data_group = genre_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))
+    director_data_group = director_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))
     # indexing save
     user2uidx, item2iidx, _, _ = load_index_file()
     
