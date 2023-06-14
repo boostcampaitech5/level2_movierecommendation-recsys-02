@@ -9,7 +9,7 @@ from args import parse_args
 from logging import getLogger
 import torch
 import pdb
-import wandb
+# import wandb
 from util import load_data_file, save_atomic_file , make_config
 
 from recbole.model.general_recommender.multivae import MultiVAE
@@ -67,20 +67,12 @@ def main(args):
     """
     #wandb.login()
     #wandb.init(project='movierec', entity='recommy_movierec')
-    config_name = args.config
-    model_name = args.model_name
-    top_k = args.top_k
     #wandb.run.name = f'{model_name}_{config_name}_epoch{args.epochs}'   
     
     train_data, user_data, item_data = load_data_file()
 
     save_atomic_file(train_data, user_data, item_data)
-    
-    # to_csv
-    outpath = f"dataset/train_data"
-    os.makedirs(outpath, exist_ok=True)
-    train.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False)
-        
+            
     load_yaml(args)
     # run
     print(f"running {args.model_name}...")
