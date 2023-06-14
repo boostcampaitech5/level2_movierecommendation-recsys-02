@@ -19,6 +19,9 @@ from recbole.config import Config
 from recbole.data import create_dataset, data_preparation, Interaction
 from recbole.utils import init_logger, get_trainer, get_model, init_seed, set_color
 
+from util_yaml import load_yaml
+import pdb
+
 # 사용법
 # python run_recbole.py --model_name=[] --epochs=[]
 SEED=13
@@ -28,6 +31,32 @@ general_models = ['EASE','MultiVAE','MultiDAE','ADMMSLIM','NGCF','RecVAE','FM']
 context_models = ['FM','FFM','DeepFM']
 
 
+def run(args):
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+    if args.model_name in [
+        "MultiVAE",
+        "MultiDAE",
+        "RecVAE",
+        "EASE"
+
+    ]:
+        parameter_dict = {
+            "neg_sampling": None,
+        }
+
+        return run_recbole(
+            model=args.model_name,
+            dataset='train_data',
+            config_file_list=[os.path.join(curr_dir, 'yaml_dir', f'{args.model_name}.yaml')],
+            config_dict=parameter_dict,
+        )
+    else:
+        return run_recbole(
+            model=args.model_name,
+            dataset='train_data',
+            config_file_list=[os.path.join(curr_dir, 'yaml_dir', f'{args.model_name}.yaml')],
+        )
 
 def main(args):
     """모델 train 파일
@@ -36,56 +65,32 @@ def main(args):
         나머지는 hyper parameter 입니다. 
     
     """
-    wandb.login()
-    wandb.init(project='movierec', entity='recommy_movierec')
+    #wandb.login()
+    #wandb.init(project='movierec', entity='recommy_movierec')
     config_name = args.config
     model_name = args.model_name
     top_k = args.top_k
-    wandb.run.name = f'{model_name}_{config_name}_epoch{args.epochs}'   
+    #wandb.run.name = f'{model_name}_{config_name}_epoch{args.epochs}'   
     
     train_data, user_data, item_data = load_data_file()
 
     save_atomic_file(train_data, user_data, item_data)
     
-    # config 파일이 없을 경우 생성                
-    if not os.path.isfile(f'./{config_name}'):
-        print("Make config...")
-        make_config(config_name)
+    # to_csv
+    outpath = f"dataset/train_data"
+    os.makedirs(outpath, exist_ok=True)
+    train.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False)
         
-    parameter_dict = args.__dict__
-   
-    # Default eval_args를 저장
-    if model_name in general_models:
-        parameter_dict['eval_args'] = {
-            'group_by': 'user',
-            'order': 'RO',
-            'mode': 'full',}
-        
-    # context 모델일 경우 eval_args 변경
-    elif model_name in context_models:
-        parameter_dict['eval_args'] = {
-            'group_by': 'user',
-            'order': 'TO',
-            'mode': 'full',}        
+    load_yaml(args)
+    # run
+    print(f"running {args.model_name}...")
+    start = time.time()
+    result = run(args)
+    t = time.time() - start
+    print(f"It took {t/60:.2f} mins")
+    print(result)
     
-    # Sequential 모델일 경우 eval_args와 loss_type을 변경
-    elif model_name in seq_models:
-        parameter_dict['eval_args'] = {
-            'group_by': 'user',
-            'order': 'TO',
-            'mode': 'full',}
-        parameter_dict['loss_type'] = 'BPR'
-    
-    #run_recbole
-    print(f"running {model_name}...")
-    result = run_recbole(
-        model = model_name,
-        dataset = 'train_data',
-        config_file_list = [config_name],
-        config_dict = parameter_dict,
-    )
-
-    wandb.run.finish()
+    #wandb.run.finish()
 if __name__ == "__main__":
     args = parse_args()
     main(args)
