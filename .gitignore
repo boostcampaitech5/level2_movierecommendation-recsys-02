@@ -185,3 +185,9 @@ Recbole/general/output/*
 # model
 Recbole/general/log_tensorboard/*
 Recbole/general/saved/*
+
+log_tensorboard/
+dataset/
+index/
+output/
+saved/
