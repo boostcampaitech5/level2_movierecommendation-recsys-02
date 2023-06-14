@@ -26,13 +26,14 @@ def main(args):
         --rank_K로 몇개의 추천아이템을 뽑아낼지 선택합니다.
     """
     seq_models = ['SASRec','GRU4Rec']
-    general_models = ['EASE','MultiVAE','MultiDAE','ADMMSLIM','NGCF','RecVAE']
+    general_models = ['EASE','MultiVAE','MultiDAE','ADMMSLIM','NGCF','RecVAE','FM']
+    context_models = ['FM','FFM','DeepFM']
     K = args.rank_K
 
     model_path = 'saved/'+args.inference_model
     model_name = model_path[6:-4].split('-')[0]
     
-    if model_name in general_models:
+    if model_name in general_models :
         checkpoint = torch.load(model_path)
         config = checkpoint['config']
         config['dataset'] = 'train_data'
@@ -140,7 +141,7 @@ def main(args):
         print('inference done!')  
         
         
-    elif model_name in seq_models:
+    elif model_name in seq_models or model_name in context_models:
         # config, model, dataset 불러오기
         checkpoint = torch.load(model_path)
         config = checkpoint['config']
