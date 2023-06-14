@@ -41,7 +41,7 @@ def main(args):
     config_name = args.config
     model_name = args.model_name
     top_k = args.top_k
-    wandb.run.name = f'{model_name}_{config_name}_epoch{arg.epochs}'   
+    wandb.run.name = f'{model_name}_{config_name}_epoch{args.epochs}'   
     
     train_data, user_data, item_data = load_data_file()
 
