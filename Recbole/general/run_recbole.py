@@ -9,6 +9,7 @@ from args import parse_args
 from logging import getLogger
 import torch
 import pdb
+import wandb
 from util import load_data_file, save_atomic_file , make_config
 
 from recbole.model.general_recommender.multivae import MultiVAE
@@ -35,9 +36,12 @@ def main(args):
         나머지는 hyper parameter 입니다. 
     
     """
+    wandb.login()
+    wandb.init(project='movierec', entity='recommy_movierec')
     config_name = args.config
     model_name = args.model_name
     top_k = args.top_k
+    wandb.run.name = f'{model_name}_{config_name}_epoch{arg.epochs}'   
     
     train_data, user_data, item_data = load_data_file()
 
@@ -80,7 +84,8 @@ def main(args):
         config_file_list = [config_name],
         config_dict = parameter_dict,
     )
-    
+
+    wandb.run.finish()
 if __name__ == "__main__":
     args = parse_args()
     main(args)
