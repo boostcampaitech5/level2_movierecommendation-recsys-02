@@ -104,6 +104,17 @@ def load_data_file():
     writer_data = pd.read_csv(os.path.join(data_path, 'writers.tsv'), sep='\t')
     genre_data = pd.read_csv(os.path.join(data_path, 'genres.tsv'), sep='\t')
     director_data = pd.read_csv(os.path.join(data_path, 'directors.tsv'), sep='\t')
+    
+    return train_data, year_data, writer_data, title_data, genre_data, director_data
+
+def merge_data_file(
+    train_data,
+    year_data,
+    writer_data,
+    title_data,
+    genre_data,
+    director_data
+):
     writer_data_group = writer_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))
     genre_data_group = genre_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))
     director_data_group = director_data.groupby('item', as_index=False).agg(lambda x: ' '.join(set(x)))

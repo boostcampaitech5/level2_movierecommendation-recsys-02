@@ -10,7 +10,8 @@ from logging import getLogger
 import torch
 import pdb
 # import wandb
-from util import load_data_file, save_atomic_file , make_config
+from util import load_data_file, save_atomic_file , make_config, merge_data_file
+from feature_engineering import feature_engineering
 
 from recbole.model.general_recommender.multivae import MultiVAE
 from recbole.quick_start import run_recbole
@@ -69,7 +70,11 @@ def main(args):
     #wandb.init(project='movierec', entity='recommy_movierec')
     #wandb.run.name = f'{model_name}_{config_name}_epoch{args.epochs}'   
     
-    train_data, user_data, item_data = load_data_file()
+    train, year_data, writer_data, title_data, genre_data, director_data = load_data_file()
+    
+    train, year_data, writer_data, title_data, genre_data, director_data = feature_engineering(train, year_data, writer_data, title_data, genre_data, director_data)
+    
+    train_data, user_data, item_data = merge_data_file(train, year_data, writer_data, title_data, genre_data, director_data)
 
     save_atomic_file(train_data, user_data, item_data)
             
