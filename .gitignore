@@ -191,3 +191,5 @@ dataset/
 index/
 output/
 saved/
+
+wandb/

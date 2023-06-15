@@ -17,12 +17,13 @@ def feature_engineering(
     remove_same_title(train_data)
     year_preprocessing(title_data, year_data)
     remove_year_for_title(title_data)
-    train_data = timestamp_feature(train_data)
+    # timestamp_feature(train_data)
     writer_preprocessing(writer_data)
     director_preprocessing(director_data)
-    writer_data, director_data, genre_data = merge_list(writer_data,director_data,genre_data)
-    rename_year(year_data)
-    # year_data['pub_year_cat'],year_data['pub_year_nor'] = year_data['pub_year'].copy(),year_data['pub_year'].copy()
+    # writer_data, director_data, genre_data = merge_list(writer_data, director_data, genre_data)
+    # rename_year(year_data)
+    # year_data['pub_year_cat'] = pub_year_to_category(year_data['pub_year'])
+    # year_data['pub_year_nor'] = pub_year_to_normalize(year_data['pub_year'])
     # genre_data = apply_pca_to_genre(genre_data, 2)
 
     return train_data, year_data, writer_data, title_data, genre_data, director_data
@@ -43,28 +44,35 @@ def year_preprocessing(title_data, year_data):
 
 def timestamp_feature(train_data:pd.DataFrame)->pd.DataFrame:
     '''
-    timestamp를 날짜 형식에 맞춰서 연산 가능한 형태로 바꿈꿈 
+        기존 'time' 컬럼을 쪼개서 'year', 'month', 'day', 'hour' 컬럼 추가
     '''
-    train_data['time'] = train_data['time'].apply(lambda x: time.strftime('%Y-%m-%d-%H', time.localtime(int(x))))
-    date_df = train_data['time'].str.split("-", expand=True)
+    train_data_copy = train_data.copy()
+    train_data_copy['time'] = train_data_copy['time'].apply(lambda x: time.strftime('%Y-%m-%d-%H', time.localtime(int(x))))
+    date_df = train_data_copy['time'].str.split("-", expand=True)
     date_df.columns = ['ex_year', 'ex_month', 'ex_day','ex_hour'] 
     train_data = pd.concat([train_data, date_df], axis=1)
 
-    return train_data
-
 def remove_year_for_title(title_data:pd.DataFrame)->pd.DataFrame:
-    # title에서 괄호와 괄호 내 문자열 제거
+    '''
+        title에서 괄호와 괄호 내 문자열 제거
+    '''
     title_data['title'] = title_data['title'].str.replace(pat = r'\(.*\)|\s-\s.*', repl=r'', regex=True)
     title_data['title'] = title_data['title'].str.replace(pat = r'\, The|\s-\s.*', repl=r'', regex=True)
     title_data['title'] = title_data['title'].str.strip()
 
 def merge_list(writer_data,director_data,genre_data):
+    '''
+        writer_data, director_data, genre_data를 itemID 기준으로 묶어줌 (리스트로 반환)
+    '''
     writer_data = writer_data.groupby(by = ['item'])['writer'].apply(list).reset_index(name = 'writer')
     director_data = director_data.groupby(by = ['item'])['director'].apply(list).reset_index(name = 'director')
     genre_data = genre_data.groupby(by = ['item'])['genre'].apply(list).reset_index(name = 'genre')
     return writer_data, director_data, genre_data
 
 def rename_year(year_data:pd.DataFrame)->pd.DataFrame:
+    '''
+        year_data의 'year' 컬럼이름을 'pub_year'로 바꿈
+    '''
     year_data.columns=['item','pub_year']
 
 def apply_pca_to_genre(genre_data, n):
@@ -97,11 +105,16 @@ def remove_same_title(train_data):
     train_data.loc[train_data[train_data['item'] == 64997].index, 'item'] = 34048
 
 def pub_year_to_normalize(pub_year:int,mean:int=1992.174732,std:int=19.052568):
+    '''
+        'pub_year' 컬럼을 정규화해서 반환함
+    '''
     pub_year = (pub_year - mean)/std
     return pub_year
 
 def pub_year_to_category(pub_year:int):
-
+    '''
+        'pub_year' 컬럼을 카테고리화해서 반환함
+    '''
     if pub_year <= 1950:
         return 1950
     elif pub_year <= 1960:
@@ -122,7 +135,13 @@ def pub_year_to_category(pub_year:int):
         return 2015
 
 def writer_preprocessing(writer_data):
+    '''
+        writer_data의 결측치 채움
+    '''
     writer_data.loc[writer_data[writer_data.isna()].index, 'writer'] == 'nm0000000'
     
 def director_preprocessing(director_data):
+    '''
+        director_data의 결측치 채움
+    '''
     director_data.loc[director_data[director_data.isna()].index, 'director'] == 'nm0000000'
