@@ -206,10 +206,9 @@ wandb_project : Recbole
 
 # dataset config : Context-aware Recommendation
 load_col:
-    inter: ['user_id', 'item_id', 'rating', 'timestamp']
-    user: ['user_id', 'age', 'gender', 'occupation']
-    item: ['item_id', 'release_year', 'class']
-threshold: {{'rating': 4}}
+    inter: [user_id, item_id, timestamp]
+    user : [user_id]
+    item: [item_id, year, writer, title, genre, director]
 
 # model config
 {model_basic_param}

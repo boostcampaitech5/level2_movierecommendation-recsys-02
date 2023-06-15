@@ -2,39 +2,7 @@ import os, pdb, pickle
 import pandas as pd
 from datetime import datetime
 
-def make_config(config_name : str) -> None:
-    yamldata="""
-    field_separator: "\t"
-    USER_ID_FIELD: user_id
-    ITEM_ID_FIELD: item_id
-    TIME_FIELD: timestamp
-    
-    load_col:
-        inter: [user_id, item_id, timestamp]
-        user : [user_id]
-        item: [item_id, year, writer, title, genre, director]
 
-    train_neg_sample_args:
-        distribution : uniform
-        sample_num : 1
-
-    selected_features: [year, writer, title, genre, director]
-    
-    show_progress : False
-    device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    metrics: ['Recall', 'MRR', 'NDCG', 'Hit', 'Precision', 'MAP']
-    topk: 10
-    valid_metric: Recall@10
-    
-    stopping_step : 10
-    
-    """
-    
-    with open(f"{config_name}", "w") as f:
-        f.write(yamldata)
-
-    return
 def load_index_file():
     curr_path = os.path.dirname(os.path.realpath(__file__))
     train_data_path = os.path.join('/opt/ml/input/data/train', 'train_ratings.csv')

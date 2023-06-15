@@ -10,7 +10,7 @@ from logging import getLogger
 import torch
 import pdb
 # import wandb
-from util import load_data_file, save_atomic_file , make_config, merge_data_file
+from util import load_data_file, save_atomic_file , merge_data_file
 from feature_engineering import feature_engineering
 
 from recbole.model.general_recommender.multivae import MultiVAE
@@ -21,15 +21,16 @@ from recbole.data import create_dataset, data_preparation, Interaction
 from recbole.utils import init_logger, get_trainer, get_model, init_seed, set_color
 
 from util_yaml import load_yaml
-import pdb
+
 
 # 사용법
 # python run_recbole.py --model_name=[] --epochs=[]
 SEED=13
 
-seq_models = ['SASRec','GRU4Rec']
-general_models = ['EASE','MultiVAE','MultiDAE','ADMMSLIM','NGCF','RecVAE','FM']
-context_models = ['FM','FFM','DeepFM']
+general_model = ['Pop', 'ItemKNN', 'BPR', 'NeuMF', 'ConvNCF', 'DMF', 'FISM', 'NAIS', 'SpectralCF', 'GCMC', 'NGCF', 'LightGCN', 'DGCF', 'LINE', 'MultiVAE', 'MultiDAE', 'MacridVAE', 'CDAE', 'ENMF', 'NNCF', 'RaCT', 'RecVAE', 'EASE', 'SLIMElastic', 'SGL', 'ADMMSLIM', 'NCEPLRec', 'SimpleX', 'NCL']
+sequence_model = ['FPMC', 'GRU4Rec', 'NARM', 'STAMP', 'Caser', 'NextItNet', 'TransRec', 'SASRec', 'BERT4Rec', 'SRGNN', 'GCSAN', 'GRU4RecF', 'SASRecF', 'FDSA', 'S3Rec', 'GRU4RecKG', 'KSR', 'FOSSIL', 'SHAN', 'RepeatNet', 'HGN', 'HRM', 'NPE', 'LightSANs', 'SINE', 'CORE' ]
+context_aware_model = ['LR', 'FM', 'NFM', 'DeepFM', 'xDeepFM', 'AFM', 'FFM', 'FwFM', 'FNN', 'PNN', 'DSSM', 'WideDeep', 'DIN', 'DIEN', 'DCN', 'DCNV2', 'AutoInt', 'XGBOOST', 'LIGHTGBM' ]
+knowledge_based_model = ['CKE', 'CFKG', 'KTUP', 'KGAT', 'KGIN', 'RippleNet', 'MCCLK', 'MKR', 'KGCN', 'KGNNLS']
 
 
 def run(args):
@@ -39,11 +40,11 @@ def run(args):
         "MultiVAE",
         "MultiDAE",
         "RecVAE",
-        "EASE"
+        "MacridVAE"
 
     ]:
         parameter_dict = {
-            "neg_sampling": None,
+           'train_neg_sample_args': None,
         }
 
         return run_recbole(
