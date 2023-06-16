@@ -222,7 +222,8 @@ eval_args:
   order: RO
   group_by: ~
   mode: labeled
-train_neg_sample_args: ~
+train_neg_sample_args: 
+    uniform : 1
 
 device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
