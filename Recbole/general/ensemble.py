@@ -5,76 +5,68 @@ from tqdm import tqdm
 import argparse
 import os
 import glob
+'''
+사용방법
+1. python ensemble.py 
+2. 앙상블할 ratio 입력하기.(앙상블할 모델의 수만큼 입력해줘야 함) ex) 111  
+'''
 
-def pick_model(args):
-    pick_model = glob.glob('*.csv')
+
+def models_list(args):
+    models_list = glob.glob('*.csv')
     if args.pick is not None:
-        pick_model = [i for i in pick_model if args.pick in i]
-    print(pick_model)
-    return pick_model
+        models_list = [i for i in models_list if args.pick in i]
+    print("앙상블 모델 개수 :",len(models_list))
+    print("앙상블 모델 목록 :",models_list)
+    return models_list
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pick", default=None, type=str)
-    parser.add_argument("--ratio", default=None, type=list)
+    parser.add_argument("--ratio", default=input("앙상블할 ratio 를 입력하시오."), type=list)
+    parser.add_argument("--K", default=10, type=int)
+
+    
     return parser.parse_args()
 
-def make_csv(models_list,ratio):
+def make_csv(models_list,ratio,K):
     W_dict = dict(zip(models_list,ratio))
-    print("model_list",W_dict)
+
+    
+    print("딕셔너리 확인 : ",W_dict)
+    ratios = list(W_dict.values())
+    ratios = [float(ratio) for ratio in ratios]
+
 
     dataframe_list = []
 
     for i in range(len(models_list)):
         dataframe_list.append(pd.read_csv(models_list[i]))
 
+    K=K
+    result = []
+    user_list = dataframe_list[0]['user'].unique()
+    tbar = tqdm(user_list, desc='Ensemble')
+    dataframe_len = len(dataframe_list)
+    rank_len = len(W_dict)
+    rank_ratio = list(map(int, ratio))
+    for user in tbar:
+        temp = defaultdict(float)
+        for df_idx in range(dataframe_len):
+            items = dataframe_list[df_idx][dataframe_list[df_idx]['user'] == user]['item'].values
+            max_rank = min(len(items), rank_len)
+            for rank_idx in range(max_rank):
+                temp[items[rank_idx]] += rank_ratio[rank_idx] * ratios[df_idx]
+
+        for key, _ in sorted(temp.items(), key=lambda x: x[1], reverse=True)[:K]:
+            result.append((user, key))
+    
+    filename="*".join([f"{m.split('.')[0]} : {r}" for m,r in zip(models_list,ratios) if ".csv" in m])
+    submission = pd.DataFrame(result, columns=['user', 'item'])
+    submission.to_csv(f'{filename}.csv', index=False)
+        
 
 if __name__ == "__main__":
     args = parse_args()
-    models_list = pick_model(args)
-    make_csv(models_list,args.ratio)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# dataframe_list = []
-
-# print('순위별 가중치값 입력(ex: 1 0.9 0.8 ...)')
-# rank_ratio = [1 for _ in range(10)] + [0.3 for _ in range(5)]
-# rank_len = len(rank_ratio)
-
-# print(f"앙상블 모델 개수: {len(filepaths)}")
-
-# for i in range(len(filepaths)):
-#     dataframe_list.append(pd.read_csv(filepaths[i]))
-
-# user_list = dataframe_list[0]['user'].unique()
-# dataframe_len = len(dataframe_list)
-
-
-# ratios = list(w_dict.values())
-# K=10
-# result = []
-# tbar = tqdm(user_list, desc='Ensemble')
-# for user in tbar:
-#     temp = defaultdict(float)
-#     for df_idx in range(dataframe_len):
-#         items = dataframe_list[df_idx][dataframe_list[df_idx]['user'] == user]['item'].values
-#         max_rank = min(len(items), rank_len)
-#         for rank_idx in range(max_rank):
-#             temp[items[rank_idx]] += rank_ratio[rank_idx] * ratios[df_idx]
-
-#     for key, _ in sorted(temp.items(), key=lambda x: x[1], reverse=True)[:K]:
-#         result.append((user, key))
+    models_list = models_list(args)
+    make_csv(models_list,args.ratio,args.K)
