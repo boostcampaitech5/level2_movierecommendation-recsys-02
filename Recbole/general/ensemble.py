@@ -26,7 +26,7 @@ import pdb
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pick", default=None, type=str)
-    parser.add_argument("--ratio", default=None, type=list)
+    #parser.add_argument("--ratio", default=None, type=list)
     parser.add_argument("--K", default=10, type=int)
     parser.add_argument("--option", default="prior", type=str ,help="[prior,weight]")
 
@@ -50,55 +50,64 @@ def check_attribute(args):
     return file_list
 
 
-def ensemble_prior():
-    dataframe_list = []
-    prior = []
+def ensemble_prior(file_list,args):
+    dataframe_dict ={} 
     for i in range(len(file_list)):
         file = file_list[i]
-        if file[0] == "1":
-            prior_df = pd.read_csv(file_list[i])
-            prior_df.groupby('user').head(8)
-            dataframe_list.append(temp_df)
-        else:
-            temp_df = pd.read_csv(file_list[i])
-            dataframe_list.append(temp_df)
-
-    
-        temp_df['prior'] = [k for k in range((i+1)*8)]*31360
-
+        # print(file.split("/")[-1][0])
+        prior_num = int(file.split("/")[-1][0])
         
-        result = pd.concat(dataframe_dict)
-        result = result.drop_duplicates(['user','item'],keep='first')
-        result = result.sort_values(['user','prior'])
-        result = result.groupby('user').head(10)
+        if prior_num == 1:
+            prior1_df = pd.read_csv(file)
+            prior1_df = prior1_df.groupby('user').head(8)
+            prior1_df['prior'] = [i for i in range(8)]*31360
+            dataframe_dict["1"] = prior1_df
+        else:
+            prior2_df = pd.read_csv(file)
+            prior2_df['prior'] = [i for i in range(8,18)]*31360
+            dataframe_dict["2"] = prior2_df
 
+    result = pd.concat([dataframe_dict["1"],dataframe_dict["2"]])
+    result = result.drop_duplicates(['user','item'],keep='first')
+    result = result.sort_values(['user','prior']).reset_index(drop=True)
+    result = result.groupby('user').head(10)
     return result[['user','item']]
 
-def ensemble_weight():
+#hard voting
+def ensemble_weight(file_list):
+    ratios = input(f"(모델 수 : {len(file_list)})띄어쓰기로 구분하여 ratio 입력하기")
+    ratios = ratios.split(" ")
+    ratios = list(map(int,ratios))
+    if len(ratios) != len(file_list):
+        raise ValueError("모델 수와 가중치값의 수가 맞지 않음") 
+    df_list = [pd.read_csv(f) for f in file_list]
 
-    W_dict = dict(zip(file_list,ratio))
-    #print("딕셔너리 확인 : ",W_dict)
-    ratios = list(W_dict.values())
-    ratios = [float(ratio) for ratio in ratios]
-    return None
+    for df,ratio in zip(df_list,ratios):
+        df["weight"] = ratio
+    result = pd.concat(df_list).reset_index(drop=True)
+    g = result.groupby(['user','item']).agg({'weight': 'sum'})
+    g['weight'] = - g['weight']
+    g = g.sort_values(['user','weight'])
+    g['weight'] = - g['weight']
+    result = g.groupby('user').head(10)
+    return result[['user','item']] , ratios
 
-def make_csv(file_list,args):
-    W_dict = dict(zip(file_list,ratio))
-    #print("딕셔너리 확인 : ",W_dict)
-    ratios = list(W_dict.values())
-    ratios = [float(ratio) for ratio in ratios]
-
+#weight
+def make_csv(args,file_list):
+    option = args.option
     if option == "prior":
-        result = ensemble_prior()
+        result = ensemble_prior(file_list,args)
+        filename= f"{args.option} : "+ "+".join([f"{m.split('/')[-1][:-4]}" for m in file_list if ".csv" in m])
+        result.to_csv(f'./output/{filename}.csv',index=False)
+    
     elif option == "weight":
-        result = ensemble_weight()
-
-    filename="*".join([f"{args.option}:{m.split('/')[-1][:-4]} : {r}" for m,r in zip(file_list,ratios) if ".csv" in m])
-    result.to_csv(f'./output/{filename}.csv',index=False)
+        result,ratios = ensemble_weight(file_list)
+        #ratios = [ for r in ratios]
+        filename= f"{args.option} : "+ "+".join([f"{m.split('/')[-1][:-4]}_{r}" for m,r in zip(file_list,ratios) if ".csv" in m])
+        result.to_csv(f'./output/{filename}.csv',index=False)
 
 
 if __name__ == "__main__":
     args = parse_args()
-    file_list = file_list(args)
-    #pdb.set_trace()
-    make_csv(file_list,args)
+    file_list = check_attribute(args)
+    make_csv(args,file_list)
