@@ -221,7 +221,7 @@ eval_args:
   split: {{'RS':[0.9, 0.1, 0.0]}}
   order: RO
   group_by: ~
-  mode: labeled
+  mode: full
 train_neg_sample_args: 
     uniform : 1
 
