@@ -54,10 +54,12 @@ def ensemble_prior(file_list,args):
     dataframe_dict ={} 
     for i in range(len(file_list)):
         file = file_list[i]
-        # print(file.split("/")[-1][0])
-        prior_num = int(file.split("/")[-1][0])
+        # # print(file.split("/")[-1][0])
+        # prior_num = file.split("/")[-1][0]
+        # if prior_num.isdigit():
+        #     prior_num = int(prior_num)
         
-        if prior_num == 1:
+        if file.split("/")[-1][0] == "1":
             prior1_df = pd.read_csv(file)
             prior1_df = prior1_df.groupby('user').head(8)
             prior1_df['prior'] = [i for i in range(8)]*31360
@@ -90,6 +92,7 @@ def ensemble_weight(file_list):
     g = g.sort_values(['user','weight'])
     g['weight'] = - g['weight']
     result = g.groupby('user').head(10)
+    result = result.reset_index()
     return result[['user','item']] , ratios
 
 #weight
@@ -97,13 +100,13 @@ def make_csv(args,file_list):
     option = args.option
     if option == "prior":
         result = ensemble_prior(file_list,args)
-        filename= f"{args.option} : "+ "+".join([f"{m.split('/')[-1][:-4]}" for m in file_list if ".csv" in m])
+        filename= f"{args.option} : "+ "_".join([f"{m.split('/')[-1][:-4]}" for m in file_list if ".csv" in m])
         result.to_csv(f'./output/{filename}.csv',index=False)
     
     elif option == "weight":
         result,ratios = ensemble_weight(file_list)
-        #ratios = [ for r in ratios]
-        filename= f"{args.option} : "+ "+".join([f"{m.split('/')[-1][:-4]}_{r}" for m,r in zip(file_list,ratios) if ".csv" in m])
+        #ratios = [ for r in ra/opt/ml/git/04.for_ensemble/level2_movierecommendation-recsys-02/.gittios]
+        filename= f"{args.option} _ "+ "+".join([f"{m.split('/')[-1][:-4]}_{r}" for m,r in zip(file_list,ratios) if ".csv" in m])
         result.to_csv(f'./output/{filename}.csv',index=False)
 
 
