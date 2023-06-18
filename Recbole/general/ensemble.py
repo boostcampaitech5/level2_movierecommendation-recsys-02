@@ -9,8 +9,6 @@ import pdb
 '''
 인자설정
 "--pick", default=None : output 폴더에서 앙상블할 파일에 공통으로 들어가는 단어 입력
-"--ratio", default=None, type=list : 
-        weight 앙상블의 경우 웨이
 "--K", default=10, : 각 유저별로 생성되는 추천의 수 
 "--option", default="prior"
     - prior : 우선순위를 기준으로 앙상블
@@ -18,8 +16,14 @@ import pdb
 
     
 사용방법
-1. python ensemble.py 
-2. 앙상블할 ratio 입력하기.(앙상블할 모델의 수만큼 입력해줘야 함) ex) 111  
+1. hard voting
+    ※ 우선순위로 줄 파일에 1_붙여서 돌리기
+    ex) EASE_@.csv , SASRec_@.csv, Ease 우선순위로 앙상블 하는 경우 
+        1_EASE_@.csv , SASRec_@.csv 로 변경해서 앙상블 돌리기
+    python ensemble.py --pick {ex:@} 
+2. wight sum 
+    python ensemble.py --pick {ex:@} --option weight 명령어 입력
+    -> ratio 입력 창 뜸 -> 띄어쓰기해서 ratio 입력하기
 '''
 
 
@@ -54,10 +58,6 @@ def ensemble_prior(file_list,args):
     dataframe_dict ={} 
     for i in range(len(file_list)):
         file = file_list[i]
-        # # print(file.split("/")[-1][0])
-        # prior_num = file.split("/")[-1][0]
-        # if prior_num.isdigit():
-        #     prior_num = int(prior_num)
         
         if file.split("/")[-1][0] == "1":
             prior1_df = pd.read_csv(file)
@@ -105,7 +105,6 @@ def make_csv(args,file_list):
     
     elif option == "weight":
         result,ratios = ensemble_weight(file_list)
-        #ratios = [ for r in ra/opt/ml/git/04.for_ensemble/level2_movierecommendation-recsys-02/.gittios]
         filename= f"{args.option} _ "+ "+".join([f"{m.split('/')[-1][:-4]}_{r}" for m,r in zip(file_list,ratios) if ".csv" in m])
         result.to_csv(f'./output/{filename}.csv',index=False)
 
