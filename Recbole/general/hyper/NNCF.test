@@ -1,0 +1,5 @@
+neigh_num choice [20,50,100]
+neigh_embedding_size choice [64,32]
+num_conv_kernel choice [128,64]
+learning_rate choice [5e-5,1e-4,5e-4]
+neigh_info_method choice ['random','knn']

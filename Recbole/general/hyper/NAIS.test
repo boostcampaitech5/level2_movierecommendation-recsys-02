@@ -1,0 +1,5 @@
+learning_rate choice [1e-4, 1e-3,1e-2]
+weight_size choice [64,32]
+reg_weights choice ['[1e-7, 1e-7, 1e-5]', '[0, 0, 0]']
+alpha choice [0.0]
+beta choice [0.5]

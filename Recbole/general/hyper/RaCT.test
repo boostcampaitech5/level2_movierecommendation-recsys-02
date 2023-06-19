@@ -1,0 +1,2 @@
+dropout_prob choice [0.1,0.3,0.5]
+anneal_cap choice [0.2,0.5]

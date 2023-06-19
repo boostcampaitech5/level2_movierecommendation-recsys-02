@@ -1,0 +1,5 @@
+learning_rate choice [1e-4,5e-4,1e-3,5e-3,6e-3]
+mlp_hidden_size choice ['[128,128,128]','[256,256,256]','[512,512,512]','[1024,1024,1024]']
+reg_weight choice [1,2,5]
+cross_layer_num choice [6]
+dropout_prob choice [0.1,0.2]
