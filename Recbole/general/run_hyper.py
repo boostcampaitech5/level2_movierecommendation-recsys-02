@@ -56,18 +56,16 @@ def custom_objective_function(config_dict=None, config_file_list=None, saved=Tru
 def custom_export_result(hp, output_file=None):
         
         with open(output_file, "w") as fp:
-            for params in hp.params2result:
-                fp.write(
-                    "Best Parameters\n"
-                    + params 
-                    + "\n\n"
-                )
-                fp.write(
-                    "Best valid score\n"
-                    + str(hp.params2result[params]["best_valid_score"])
-                    + "\n\n"
+            
+            fp.write(
+                "Best Parameters\n"
+                + str(hp.best_params)
+                + "\n\n"
+                + "Best valid score\n"
+                + str(hp.best_score)
+                + "\n\n"
                     +"--------------------------total results---------------------------\n\n"
-                )
+            )
             
             for param, score in zip(hp.params_list, hp.score_list):
                 fp.write(
