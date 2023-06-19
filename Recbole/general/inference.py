@@ -8,6 +8,7 @@ from tqdm import tqdm
 from args import parse_args
 from logging import getLogger
 import torch
+import pdb
 from util import afterprocessing
 
 from recbole.model.general_recommender.multivae import MultiVAE
@@ -42,6 +43,7 @@ def main(args):
         print("create dataset start!")
         dataset = create_dataset(config)
         train_data, valid_data, test_data = data_preparation(config, dataset)
+        test_data = submission
         print("create dataset done!")
         model = get_model(config['model'])(config, train_data.dataset).to(config['device'])
         model.load_state_dict(checkpoint['state_dict'])
@@ -151,10 +153,10 @@ def main(args):
 
         init_seed(config['seed'], config['reproducibility'])
         config['dataset'] = 'train_data'
-        # if model_name=="S3Rec":
-        #     config['eval_args']['split']={'RS':[99999,0,1]}
-        # else:
-        #     config['eval_args']['split']['RS']=[999999,0,1]
+        if model_name in sequence_model:
+            pass
+        else:
+            config['eval_args']['split']['RS']=[0.9,0,0.1]
         print("create dataset start!")
         dataset = create_dataset(config)
         train_data, valid_data, test_data = data_preparation(config, dataset)
@@ -192,7 +194,6 @@ def main(args):
 
         # progress bar 설정
         tbar = tqdm(all_user_list, desc=set_color(f"Inference", 'pink'))
-
         for data in tbar:
             batch_pred_list = full_sort_topk(data, model, test_data, K, device=device)[1]
             batch_pred_list = batch_pred_list.clone().detach().cpu().numpy()

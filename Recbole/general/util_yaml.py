@@ -202,30 +202,28 @@ wandb_project : Recbole
 """
 
     elif args.model_name.lower() in list(map(lambda x: x.lower(), context_aware_model)):
-        yamldata = f"""
-    field_separator: "\t"
-    USER_ID_FIELD: user_id
-    ITEM_ID_FIELD: item_id
-    TIME_FIELD: timestamp
-
-    load_col:
-        inter: [user_id, item_id, timestamp]
-        user: [user_id]
-        item: [item_id, year, writer, title, genre, director]
-
-    train_neg_sample_args:
-        uniform: 1
-    epochs: {args.epochs}
-    eval_args:
-        split: {{'RS': [0.9, 0.1, 0]}}
-        group_by: user
-        order: RO
-        mode: full
-    metrics: ['Recall', 'MRR', 'NDCG', 'Hit', 'Precision', 'MAP']
-    topk: 10
-    valid_metric: Recall@10
-    """
-
+       yamldata=f"""field_separator: "\\t"
+# dataset config : Context-aware Recommendation
+load_col:
+    inter: [user_id, item_id, timestamp]
+    user : [user_id]
+    item: [item_id, year, writer, title, genre, director]
+# model config
+{model_basic_param}
+# Training and evaluation config
+epochs: {args.epochs}
+eval_args:
+  split: {{'RS':[0.9, 0.1, 0.0]}}
+  order: RO
+  group_by: user
+  mode: full
+train_neg_sample_args: 
+    uniform : 1
+device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
+metrics: ['Recall', 'MRR', 'NDCG', 'Hit', 'Precision', 'MAP']
+topk: 10
+valid_metric: Recall@10
+"""
     elif args.model_name.lower() in list(map(lambda x: x.lower(), knowledge_based_model)):
         yamldata=f"""field_separator: "\\t"
 
