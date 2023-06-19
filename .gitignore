@@ -176,12 +176,20 @@ data/train/*.csv
 data/train/*.json
 data/train/*.tsv
 data/eval/*.csv
+Recbole/general/dataset/*
 
 # output
 code/output/*
+Recbole/general/output/*
+
+# model
+Recbole/general/log_tensorboard/*
+Recbole/general/saved/*
 
 log_tensorboard/
 dataset/
 index/
 output/
 saved/
+
+wandb/
