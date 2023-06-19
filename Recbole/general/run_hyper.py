@@ -8,6 +8,7 @@ from ray.tune.schedulers import ASHAScheduler
 import os
 import argparse
 import math
+import sys
 
 import logging
 from logging import getLogger
@@ -28,21 +29,31 @@ def custom_objective_function(config_dict=None, config_file_list=None, saved=Tru
 
     config = Config(config_dict=config_dict, config_file_list=config_file_list)
     init_seed(config["seed"], config["reproducibility"])
+    init_logger(config)
     logger = getLogger()
+    logger.info(sys.argv)
+    logger.info(config)
+    
+    '''
     for hdlr in logger.handlers[:]:  # remove all old handlers
         logger.removeHandler(hdlr)
-    init_logger(config)
+    '''
     logging.basicConfig(level=logging.ERROR)
     dataset = create_dataset(config)
+    
     train_data, valid_data, test_data = data_preparation(config, dataset)
+    
     init_seed(config["seed"], config["reproducibility"])
     model_name = config["model"]
     model = get_model(model_name)(config, train_data._dataset).to(config["device"])
-    trainer = get_trainer(config["MODEL_TYPE"], config["model"])(config, model)
+    logger.info(model)
+    
+    trainer = get_trainer(config["MODEL_TYPE"], model_name)(config, model)
+    
     best_valid_score, best_valid_result = trainer.fit(
-        train_data, valid_data, verbose=False, saved=saved
+        train_data, valid_data, verbose=False, saved=saved, show_progress=True
     )
-    test_result = trainer.evaluate(test_data, load_best_model=saved)
+    test_result = trainer.evaluate(test_data, load_best_model=saved, show_progress=True)
 
     # tune.report(**test_result)
     return {
