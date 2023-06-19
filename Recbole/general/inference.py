@@ -22,18 +22,23 @@ from recbole.utils.case_study import full_sort_topk
 def main(args):
     """모델 inference 파일
     args
-        --inference_model(모델경로)로 사용할 모델을 선택합니다.
+        --inference_model SASRec-Jun-16-2023_14-26-45.pth
+        (모델경로)로 사용할 모델을 선택합니다.
         --rank_K로 몇개의 추천아이템을 뽑아낼지 선택합니다.
     """
-    seq_models = ['SASRec','GRU4Rec']
-    general_models = ['EASE','MultiVAE','MultiDAE','ADMMSLIM','NGCF','RecVAE','FM']
-    context_models = ['FM','FFM','DeepFM']
+
+    general_model = ['Pop', 'ItemKNN', 'BPR', 'NeuMF', 'ConvNCF', 'DMF', 'FISM', 'NAIS', 'SpectralCF', 'GCMC', 'NGCF', 'LightGCN', 'DGCF', 'LINE', 'MultiVAE', 'MultiDAE', 'MacridVAE', 'CDAE', 'ENMF', 'NNCF', 'RaCT', 'RecVAE', 'EASE', 'SLIMElastic', 'SGL', 'ADMMSLIM', 'NCEPLRec', 'SimpleX', 'NCL']
+    sequence_model = ['FPMC', 'GRU4Rec', 'NARM', 'STAMP', 'Caser', 'NextItNet', 'TransRec', 'SASRec', 'BERT4Rec', 'SRGNN', 'GCSAN', 'GRU4RecF', 'SASRecF', 'FDSA', 'S3Rec', 'GRU4RecKG', 'KSR', 'FOSSIL', 'SHAN', 'RepeatNet', 'HGN', 'HRM', 'NPE', 'LightSANs', 'SINE', 'CORE' ]
+    context_aware_model = ['LR', 'FM', 'NFM', 'DeepFM', 'xDeepFM', 'AFM', 'FFM', 'FwFM', 'FNN', 'PNN', 'DSSM', 'WideDeep', 'DIN', 'DIEN', 'DCN', 'DCNV2', 'AutoInt', 'XGBOOST', 'LIGHTGBM' ]
+    knowledge_based_model = ['CKE', 'CFKG', 'KTUP', 'KGAT', 'KGIN', 'RippleNet', 'MCCLK', 'MKR', 'KGCN', 'KGNNLS']
+
     K = args.rank_K
 
     model_path = 'saved/'+args.inference_model
     model_name = model_path[6:-4].split('-')[0]
+
     
-    if model_name in general_models :
+    if model_name in general_model :
         checkpoint = torch.load(model_path)
         config = checkpoint['config']
         config['dataset'] = 'train_data'
@@ -41,7 +46,7 @@ def main(args):
         dataset = create_dataset(config)
         train_data, valid_data, test_data = data_preparation(config, dataset)
         print("create dataset done!")
-        model = get_model(config['model'])(config, test_data.dataset).to(config['device'])
+        model = get_model(config['model'])(config, train_data.dataset).to(config['device'])
         model.load_state_dict(checkpoint['state_dict'])
         model.load_other_parameter(checkpoint.get('other_parameter'))
 
@@ -141,7 +146,7 @@ def main(args):
         print('inference done!')  
         
         
-    elif model_name in seq_models or model_name in context_models:
+    elif model_name in sequence_model or model_name in context_aware_model:
         # config, model, dataset 불러오기
         checkpoint = torch.load(model_path)
         config = checkpoint['config']
@@ -149,19 +154,16 @@ def main(args):
 
         init_seed(config['seed'], config['reproducibility'])
         config['dataset'] = 'train_data'
-        if model_name=="S3Rec":
-            config['eval_args']['split']={'RS':[99999,0,1]}
-        else:
-            config['eval_args']['split']['RS']=[999999,0,1]
+        # if model_name=="S3Rec":
+        #     config['eval_args']['split']={'RS':[99999,0,1]}
+        # else:
+        #     config['eval_args']['split']['RS']=[999999,0,1]
         print("create dataset start!")
         dataset = create_dataset(config)
         train_data, valid_data, test_data = data_preparation(config, dataset)
         print("create dataset done!")
 
-        dataset = create_dataset(config)
-        train_data, valid_data, test_data = data_preparation(config, dataset)
-
-        model = get_model(config['model'])(config, test_data.dataset).to(config['device'])
+        model = get_model(config['model'])(config, train_data.dataset).to(config['device'])
         model.load_state_dict(checkpoint['state_dict'])
         model.load_other_parameter(checkpoint.get('other_parameter'))
 
@@ -237,8 +239,6 @@ def main(args):
                 w.write('{},{}\n'.format(id,p))
         print('inference done!')
     
-
-
 
 
 
