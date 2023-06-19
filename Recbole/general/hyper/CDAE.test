@@ -1,0 +1,5 @@
+learning_rate choice [1e-2,1e-3,5e-3,5e-4]
+loss_type choice ['BCE','MSE']
+corruption_ratio choice [0.5,0.3,0.1]
+reg_weight_1 choice [0.0,0.01]
+reg_weight_2 choice [0.0,0.01]

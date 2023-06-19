@@ -1,0 +1,6 @@
+learning_rate choice [5e-3, 1e-2, 2e-2]
+cnn_channels choice ['[1, 32, 32, 32, 32, 32, 32]', '[1, 64, 32, 32, 32, 32]']
+cnn_kernels choice ['[2, 2, 2, 2, 2, 2]', '[4, 2, 2, 2, 2]']
+cnn_strides choice ['[2, 2, 2, 2, 2, 2]', '[4, 2, 2, 2, 2]']
+dropout_prob choice [0.0,0.1,0.2,0.3]
+reg_weights choice ['[0.0, 0.0]', '[0.1, 0.1]']

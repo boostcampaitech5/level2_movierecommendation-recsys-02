@@ -1,0 +1,4 @@
+learning_rate choice [5e-4,1e-3, 5e-3,1e-2]
+n_factors choice [2, 4, 8]
+reg_weight choice [1e-3,1e-2]
+cor_weight choice [1e-3,1e-2]

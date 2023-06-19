@@ -1,0 +1,4 @@
+learning_rate choice [0.0005, 0.001, 0.003]
+reg_weight choice [1e-5, 1e-4]
+order_len choice [1,2,3]
+alpha choice [0.2,0.4,0.6]

@@ -1,0 +1,2 @@
+learning_rate choice [0.0003, 0.0005, 0.001, 0.003, 0.005]
+pretrain_epochs choice [100]
