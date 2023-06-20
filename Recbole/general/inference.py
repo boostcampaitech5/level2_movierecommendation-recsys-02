@@ -46,7 +46,6 @@ def main(args):
         print("create dataset start!")
         dataset = create_dataset(config)
         train_data, valid_data, test_data = data_preparation(config, dataset)
-        test_data = submission
         print("create dataset done!")
         model = get_model(config['model'])(config, train_data.dataset).to(config['device'])
         model.load_state_dict(checkpoint['state_dict'])
