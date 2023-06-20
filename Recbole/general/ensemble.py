@@ -77,7 +77,8 @@ def ensemble_prior(file_list,args):
 
 #hard voting
 def ensemble_weight(file_list):
-    ratios = input(f"(모델 수 : {len(file_list)})띄어쓰기로 구분하여 ratio 입력하기")
+    #if option == 'prior':
+    ratios = input(f"(모델 수 : {len(file_list)})띄어쓰기로 구분하여 ratio 입력하기") 
     ratios = ratios.split(" ")
     ratios = list(map(int,ratios))
     if len(ratios) != len(file_list):

@@ -178,6 +178,7 @@ data/train/*.tsv
 data/eval/*.csv
 
 # output
+*.csv
 code/output/*
 
 log_tensorboard/
