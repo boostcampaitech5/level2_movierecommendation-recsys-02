@@ -1,0 +1,2 @@
+learning_rate choice [0.0005, 0.001, 0.003]
+k_interests choice [3, 5, 7, 9]

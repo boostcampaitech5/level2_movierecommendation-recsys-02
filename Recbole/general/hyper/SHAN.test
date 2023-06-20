@@ -1,0 +1,2 @@
+learning_rate choice [0.0005, 0.001, 0.003]
+short_item_length choice [1, 2, 3]

@@ -23,13 +23,16 @@ from recbole.utils.case_study import full_sort_topk
 def main(args):
     """모델 inference 파일
     args
-        --inference_model(모델경로)로 사용할 모델을 선택합니다.
+        --inference_model SASRec-Jun-16-2023_14-26-45.pth
+        (모델경로)로 사용할 모델을 선택합니다.
         --rank_K로 몇개의 추천아이템을 뽑아낼지 선택합니다.
     """
+    
     general_model = ['Pop', 'ItemKNN', 'BPR', 'NeuMF', 'ConvNCF', 'DMF', 'FISM', 'NAIS', 'SpectralCF', 'GCMC', 'NGCF', 'LightGCN', 'DGCF', 'LINE', 'MultiVAE', 'MultiDAE', 'MacridVAE', 'CDAE', 'ENMF', 'NNCF', 'RaCT', 'RecVAE', 'EASE', 'SLIMElastic', 'SGL', 'ADMMSLIM', 'NCEPLRec', 'SimpleX', 'NCL']
     sequence_model = ['FPMC', 'GRU4Rec', 'NARM', 'STAMP', 'Caser', 'NextItNet', 'TransRec', 'SASRec', 'BERT4Rec', 'SRGNN', 'GCSAN', 'GRU4RecF', 'SASRecF', 'FDSA', 'S3Rec', 'GRU4RecKG', 'KSR', 'FOSSIL', 'SHAN', 'RepeatNet', 'HGN', 'HRM', 'NPE', 'LightSANs', 'SINE', 'CORE' ]
     context_aware_model = ['LR', 'FM', 'NFM', 'DeepFM', 'xDeepFM', 'AFM', 'FFM', 'FwFM', 'FNN', 'PNN', 'DSSM', 'WideDeep', 'DIN', 'DIEN', 'DCN', 'DCNV2', 'AutoInt', 'XGBOOST', 'LIGHTGBM' ]
     knowledge_based_model = ['CKE', 'CFKG', 'KTUP', 'KGAT', 'KGIN', 'RippleNet', 'MCCLK', 'MKR', 'KGCN', 'KGNNLS']
+
     K = args.rank_K
 
     model_path = 'saved/'+args.inference_model
@@ -153,10 +156,17 @@ def main(args):
 
         init_seed(config['seed'], config['reproducibility'])
         config['dataset'] = 'train_data'
+
         if model_name in sequence_model:
             pass
         else:
             config['eval_args']['split']['RS']=[0.9,0,0.1]
+
+        # if model_name=="S3Rec":
+        #     config['eval_args']['split']={'RS':[99999,0,1]}
+        # else:
+        #     config['eval_args']['split']['RS']=[999999,0,1]
+
         print("create dataset start!")
         dataset = create_dataset(config)
         train_data, valid_data, test_data = data_preparation(config, dataset)
@@ -237,8 +247,6 @@ def main(args):
                 w.write('{},{}\n'.format(id,p))
         print('inference done!')
     
-
-
 
 
 

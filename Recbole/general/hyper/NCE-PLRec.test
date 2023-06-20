@@ -1,0 +1,3 @@
+rank choice [100,200,450]
+beta choice [0.8,1.0,1.3]
+reg_weight choice [1e-4,1e-2,1e2,15000]

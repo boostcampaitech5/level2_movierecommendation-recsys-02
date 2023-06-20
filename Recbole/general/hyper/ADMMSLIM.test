@@ -1,0 +1,3 @@
+alpha choice [0.25,0.5,0.75,1]
+lambda1 choice [0.1,0.5,5,10]
+lambda2 choice [5,50,1000,5000]

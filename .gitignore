@@ -193,3 +193,8 @@ output/
 saved/
 
 wandb/
+
+# tuning
+ray_log/
+tuning_result/
+tuning_result_display/
