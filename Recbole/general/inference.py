@@ -133,7 +133,7 @@ def main(args):
         sub.user = sub.user.map(uidx2user)
         sub.item = sub.item.map(iidx2item)
 
-        sub = afterprocessing(sub,train)
+        sub = afterprocessing(args,sub,train)
         # SAVE OUTPUT
         output_dir = os.getcwd()+'/output/'
         write_path = os.path.join(output_dir, f"{model_name}.csv")
@@ -233,7 +233,7 @@ def main(args):
         sub.user = sub.user.map(uidx2user)
         sub.item = sub.item.map(iidx2item)
 
-        sub = afterprocessing(sub,train)
+        sub = afterprocessing(args,sub,train)
         # SAVE OUTPUT
         output_dir = os.getcwd()+'/output/'
         write_path = os.path.join(output_dir, f"{model_name}.csv")

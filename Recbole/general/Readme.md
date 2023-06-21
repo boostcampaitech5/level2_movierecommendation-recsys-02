@@ -14,10 +14,10 @@ pip install -r requirements.txt
 * `args.py`: `argparse`를 통해 학습에 활용되는 여러 argument들을 받아줍니다.
 
 ### 실행방법(예시)
-'--epochs=5 처럼 =을 붙여줘야 실행됨..?'
+
 
 'train'
 python run_recbole.py --model_name=MultiVAE --epochs=5
 
-'inference'
-python inferency.py --inference_model=saved/MultiVAE~.pth --rank_k=10
+'inference' top_k = 뽑아낼려는 값 갯수
+python inferency.py --inference_model=saved/MultiVAE~.pth --top_k=10 

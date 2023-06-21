@@ -35,6 +35,7 @@ def parse_args():
     #inference
     parser.add_argument("--inference_model" , default = "None", type=str,help ="use model")
     parser.add_argument("--rank_K", default = 300, type=int, help="# of predict number")
+    parser.add_argument("--top_K" , default = 10, type=int)
     
     args = parser.parse_args()
 

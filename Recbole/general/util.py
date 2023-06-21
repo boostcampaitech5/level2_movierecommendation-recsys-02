@@ -2,7 +2,8 @@ import os, pdb, pickle
 import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
+from args import parse_args
+import argparse
 def load_index_file():
     curr_path = os.path.dirname(os.path.realpath(__file__))
     train_data_path = os.path.join('/opt/ml/input/data/train', 'train_ratings.csv')
@@ -120,7 +121,7 @@ def save_atomic_file(train_data, user_data, item_data):
     user_data.to_csv(os.path.join(outpath,"train_data.user"),sep='\t',index=False)
 
 
-def afterprocessing(sub,train):
+def afterprocessing(args,sub,train):
     # 날짜를 datetime 형식으로 변환
     new_train = train.copy()
     new_train['time'] = new_train['time'].apply(lambda x: datetime.fromtimestamp(x))
@@ -140,5 +141,5 @@ def afterprocessing(sub,train):
 
     # 늦게 개봉한 영화 제외하고 상위 10개 추출
     sub = sub[sub['lastyear'] >= sub['year']]
-    sub = sub.groupby('user').head(10)[['user','item']]
+    sub = sub.groupby('user').head(args.top_k)[['user','item']]
     return sub
