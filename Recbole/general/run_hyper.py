@@ -32,7 +32,7 @@ def custom_objective_function(config_dict=None, config_file_list=None, saved=Tru
     init_logger(config)
     logger = getLogger()
     logger.info(sys.argv)
-    logger.info(config)
+    # logger.info(config)
     
     '''
     for hdlr in logger.handlers[:]:  # remove all old handlers
@@ -55,6 +55,19 @@ def custom_objective_function(config_dict=None, config_file_list=None, saved=Tru
     )
     test_result = trainer.evaluate(test_data, load_best_model=saved, show_progress=True)
 
+    ongoing_file = os.path.join(config['ongoing_file'])
+    
+    with open(ongoing_file, 'a') as fp:
+        fp.write(
+            "[model: "
+            + str(model_name)
+            + "]     Parameters "
+            + str(config_dict)
+            + "     Valid score: "
+            + str(best_valid_score)
+            + "\n\n"
+        )
+        
     # tune.report(**test_result)
     return {
         "model": model_name,
@@ -75,7 +88,7 @@ def custom_export_result(hp, output_file=None):
                 + "Best valid score\n"
                 + str(hp.best_score)
                 + "\n\n"
-                    +"--------------------------total results---------------------------\n\n"
+                +"--------------------------total results---------------------------\n\n"
             )
             
             for param, score in zip(hp.params_list, hp.score_list):
@@ -189,6 +202,7 @@ def main():
 data_path: dataset/
 dataset: train_data
 model: {args.model_name}
+ongoing_file: "./tuning_result/{args.model_name}_ongoing.result"
 """
         with open(args.config_file, 'a') as f:
             f.write(basic_info)
