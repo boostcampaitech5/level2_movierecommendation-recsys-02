@@ -8,6 +8,10 @@ from tqdm import tqdm
 from args import parse_args
 from logging import getLogger
 import torch
+import pdb
+# import wandb
+from util import load_data_file, save_atomic_file , make_config, merge_data_file
+from feature_engineering import feature_engineering
 
 from recbole.model.general_recommender.multivae import MultiVAE
 from recbole.quick_start import run_recbole
@@ -16,13 +20,22 @@ from recbole.config import Config
 from recbole.data import create_dataset, data_preparation, Interaction
 from recbole.utils import init_logger, get_trainer, get_model, init_seed, set_color
 
+from util_yaml import load_yaml
+import pdb
 
+# 사용법
+# python run_recbole.py --model_name=[] --epochs=[]
 SEED=13
 
-model_list = ['MultiVAE','MultiDAE','RecVAE','EASE']
+seq_models = ['SASRec','GRU4Rec']
+general_models = ['EASE','MultiVAE','MultiDAE','ADMMSLIM','NGCF','RecVAE','FM']
+context_models = ['FM','FFM','DeepFM']
 
-def run(args,model_name):
-    if model_name in [
+
+def run(args):
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+    if args.model_name in [
         "MultiVAE",
         "MultiDAE",
         "RecVAE",
@@ -32,81 +45,49 @@ def run(args,model_name):
         parameter_dict = {
             "neg_sampling": None,
         }
+
         return run_recbole(
-            model=model_name,
+            model=args.model_name,
             dataset='train_data',
-            config_file_list=['general.yaml'],
+            config_file_list=[os.path.join(curr_dir, 'yaml_dir', f'{args.model_name}.yaml')],
             config_dict=parameter_dict,
         )
     else:
         return run_recbole(
-            model=model_name,
+            model=args.model_name,
             dataset='train_data',
-            config_file_list=['general.yaml'],
+            config_file_list=[os.path.join(curr_dir, 'yaml_dir', f'{args.model_name}.yaml')],
         )
-    
+
 def main(args):
     """모델 train 파일
     args:
         model_name(default - "MultiVAE") : 모델의 이름을 입력받습니다.
         나머지는 hyper parameter 입니다. 
+    
     """
-    # train load
-    train = pd.read_csv("/opt/ml/input/data/train/train_ratings.csv")
+    #wandb.login()
+    #wandb.init(project='movierec', entity='recommy_movierec')
+    #wandb.run.name = f'{model_name}_{config_name}_epoch{args.epochs}'   
     
-    # indexing save
-    user2idx = {v:k for k,v in enumerate(sorted(set(train.user)))}
-    item2idx = {v:k for k,v in enumerate(sorted(set(train.item)))}
-    uidx2user = {k:v for k,v in enumerate(sorted(set(train.user)))}
-    iidx2item = {k:v for k,v in enumerate(sorted(set(train.item)))}
+    train, year_data, writer_data, title_data, genre_data, director_data = load_data_file()
     
-    # indexing
-    train.user = train.user.map(user2idx)
-    train.item = train.item.map(item2idx)
+    train, year_data, writer_data, title_data, genre_data, director_data = feature_engineering(train, year_data, writer_data, title_data, genre_data, director_data)
     
-    # train 컬럼명 변경
-    train.columns=['user_id:token','item_id:token','timestamp:float']
-    
-    # to_csv
-    outpath = f"dataset/train_data"
-    os.makedirs(outpath, exist_ok=True)
-    train.to_csv(os.path.join(outpath,"train_data.inter"),sep='\t',index=False)
-    
-    
-    yamldata=f"""
-    USER_ID_FIELD: user_id
-    ITEM_ID_FIELD: item_id
-    TIME_FIELD: timestamp
+    train_data, user_data, item_data = merge_data_file(train, year_data, writer_data, title_data, genre_data, director_data)
 
-    load_col:
-        inter: [user_id, item_id, timestamp]
-
-    show_progress : False
-    epochs : {args.epochs}
-    device : torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    eval_args:
-        split: {{'RS': [9, 1, 0]}}
-        group_by: user
-        order: RO
-        mode: full
-    metrics: ['Recall', 'MRR', 'NDCG', 'Hit', 'Precision', 'MAP']
-    topk: {args.top_k}
-    valid_metric: Recall@10
-
-
-    """
-    with open("general.yaml", "w") as f:
-        f.write(yamldata)
-    
+    save_atomic_file(train_data, user_data, item_data)
+            
+    load_yaml(args)
     # run
-    model_name = args.model_name
-    print(f"running {model_name}...")
+    print(f"running {args.model_name}...")
     start = time.time()
-    result = run(args, model_name)
+    result = run(args)
     t = time.time() - start
     print(f"It took {t/60:.2f} mins")
     print(result)
     
+    #wandb.run.finish()
 if __name__ == "__main__":
     args = parse_args()
     main(args)
