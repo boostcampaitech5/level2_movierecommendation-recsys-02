@@ -179,6 +179,7 @@ data/eval/*.csv
 Recbole/general/dataset/*
 
 # output
+*.csv
 code/output/*
 Recbole/general/output/*
 

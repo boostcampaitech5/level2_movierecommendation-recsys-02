@@ -6,6 +6,9 @@ import argparse
 import os
 import glob
 import pdb
+import math
+import sys
+import tqdm
 '''
 인자설정
 "--pick", default=None : output 폴더에서 앙상블할 파일에 공통으로 들어가는 단어 입력
@@ -30,9 +33,10 @@ import pdb
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pick", default=None, type=str)
-    #parser.add_argument("--ratio", default=None, type=list)
-    parser.add_argument("--K", default=10, type=int)
-    parser.add_argument("--option", default="prior", type=str ,help="[prior,weight]")
+
+    #parser.add_argument("--Top_K", default=0, type=int)
+    #parser.add_argument("--k", default=10, type=int)
+    parser.add_argument("--option", default="prior", type=str ,help="[prior,weight,double]")
 
     return parser.parse_args()
 
@@ -66,6 +70,7 @@ def ensemble_prior(file_list,args):
             dataframe_dict["1"] = prior1_df
         else:
             prior2_df = pd.read_csv(file)
+            prior2_df = prior2_df.groupby('user').head(10)
             prior2_df['prior'] = [i for i in range(8,18)]*31360
             dataframe_dict["2"] = prior2_df
 
@@ -77,7 +82,8 @@ def ensemble_prior(file_list,args):
 
 #hard voting
 def ensemble_weight(file_list):
-    ratios = input(f"(모델 수 : {len(file_list)})띄어쓰기로 구분하여 ratio 입력하기")
+    #if option == 'prior':
+    ratios = input(f"(모델 수 : {len(file_list)})띄어쓰기로 구분하여 ratio 입력하기") 
     ratios = ratios.split(" ")
     ratios = list(map(int,ratios))
     if len(ratios) != len(file_list):
@@ -95,17 +101,89 @@ def ensemble_weight(file_list):
     result = result.reset_index()
     return result[['user','item']] , ratios
 
+
+# # model별 랭크별 가중치를 설정하여 11-15위 추천도 활용
+# def ensemble_double_ratio():
+#     # ratio1 - Top1-10 : Top11-15
+#     print("Write ratio for Top1-10 and Top11-15. Sum of ratios must be 1.\nex) 0.75 0.25")
+#     inputs = input().strip()
+#     ratio1_list = [float(item) for item in inputs.split() if inputs]
+
+#     # exception handling
+#     if len(ratio1_list) != 2:
+#         ValueError("Wrong ratios. Try again.\n")
+#         continue
+#     if math.fabs(sum(ratio1_list) - 1.0) > sys.float_info.epsilon:
+#         ValueError("Sum of ratios is not 1. Try again.\n")
+
+#     # ratio2 - 모델별 weight 
+#     print("\nWrite ratio for input csv files. Sum of ratios must be 1.\nex) 0.5 0.5")
+#     inputs = input().strip()
+#     ratio2_list = [float(item) for item in inputs.split() if inputs]
+
+#     # exception handling
+#     if len(ratio2_list) < 2:
+#         ValueError("Wrong ratios. Try again.\n")
+#     if math.fabs(sum(ratio2_list) - 1.0) > sys.float_info.epsilon:
+#         ValueError("Sum of ratios is not 1. Try again.\n")
+
+#     # summary inputs
+#     print("\n----------input information----------")
+#     print(f"Ratio of Top1-10 & Top11-15:\n{ratio1_list[0]} : {ratio1_list[1]}")
+#     print("Ratio of input csv files:")
+#     for idx in range(len(file_list)):
+#         print(f"[{idx}] : {file_list[idx]} - {ratio2_list[idx]}")
+#     print("-------------------------------------\n")
+
+#     # get user information
+#     user_list = file_list[0]["user"].unique()
+
+
+#     # voting
+#     '''
+#     ex)
+#       model A : model B = 0.6 : 0.4
+#       top1-10 : top11-15 = 0.75 : 0.25
+
+#     1. model A & Top1-10 = 0.6 x 0.75 ~= 0.45
+#     2. model A & Top10-15 = 0.6 x 0.25 ~= 0.15
+#     3. model B & Top1-10 = 0.4 x 0.75 = 0.3
+#     4. model B & Top10-15 = 0.4 x 0.25 = 0.1
+#     '''
+#     movie_list = []
+#     idx = 0
+#     for user in tqdm(user_list, desc="Voting"):
+#         tmp_dict = dict()
+#         for i, csv in enumerate(file_list):
+#             for add in range(10):
+#                 if csv["item"][idx + add] not in tmp_dict:
+#                     tmp_dict[csv["item"][idx + add]] = ratio1_list[0] * ratio2_list[i]
+#                 else:
+#                     tmp_dict[csv["item"][idx + add]] += ratio1_list[0] * ratio2_list[i]
+#             for add in range(10, 15):
+#                 if csv["item"][idx + add] not in tmp_dict:
+#                     tmp_dict[csv["item"][idx + add]] = ratio1_list[1] * ratio2_list[i]
+#                 else:
+#                     tmp_dict[csv["item"][idx + add]] += ratio1_list[1] * ratio2_list[i]
+#         sorted_dict = sorted(tmp_dict.items(), key=lambda item: item[1], reverse=True)
+#         for i in range(10):
+#             movie_list.append(sorted_dict[i][0])
+#         idx += 15
+
+    
+
+
 #weight
 def make_csv(args,file_list):
     option = args.option
     if option == "prior":
         result = ensemble_prior(file_list,args)
-        filename= f"{args.option} : "+ "_".join([f"{m.split('/')[-1][:-4]}" for m in file_list if ".csv" in m])
+        filename= f"{args.option}_"+ "+".join([f"{m.split('/')[-1][:-4]}" for m in file_list if ".csv" in m])
         result.to_csv(f'./output/{filename}.csv',index=False)
     
     elif option == "weight":
         result,ratios = ensemble_weight(file_list)
-        filename= f"{args.option} _ "+ "+".join([f"{m.split('/')[-1][:-4]}_{r}" for m,r in zip(file_list,ratios) if ".csv" in m])
+        filename= f"{args.option} _ "+ "+".join([f"{m.split('/')[-1][:-4]}*{r}" for m,r in zip(file_list,ratios) if ".csv" in m])
         result.to_csv(f'./output/{filename}.csv',index=False)
 
 
