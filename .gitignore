@@ -194,3 +194,7 @@ output/
 saved/
 
 wandb/
+
+#note
+Recbole/general/ensemble.ipynb 
+Recbole/general/ensemble2.ipynb 
